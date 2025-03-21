@@ -91,3 +91,26 @@ Events are dispatched to a thread pool, which assigns tasks to available threads
    ```
 5. Submit a pull request.
 
+## .gitignore
+```
+# Ignore compiled binaries
+*.o
+*.out
+*.exe
+
+# Ignore build directory
+/build/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore dependency files
+*.d
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
+```
+
