@@ -21,8 +21,8 @@ A C++ multithreaded event processing system using a thread-safe queue and a thre
 
 Clone the repository:
 ```sh
-git clone <repository-url>
-cd event_processing_system
+git clone https://github.com/tahirozsk/internship.git
+cd internship
 ```
 
 Compile the program (requires a C++11-compliant compiler):
@@ -48,7 +48,7 @@ All events processed. Program terminated.
 
 ## Project Structure
 ```
-event_processing_system/
+internship/
 ├── src/
 │   ├── main.cpp          # Main implementation with EventQueue and ThreadPool
 ├── build/                # Directory for compiled binaries (optional)
@@ -90,3 +90,4 @@ Events are dispatched to a thread pool, which assigns tasks to available threads
    git push origin feature/your-feature
    ```
 5. Submit a pull request.
+
