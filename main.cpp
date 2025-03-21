@@ -11,7 +11,6 @@ using namespace std;
 
 mutex consoleMutex;
 
-
 struct Event {
     int id;
     string type;
@@ -51,7 +50,6 @@ public:
         cv.notify_all();
     }
 };
-
 
 class ThreadPool {
 private:
@@ -107,10 +105,7 @@ public:
         }
         cv_.notify_one();
     }
-
-
 };
-
 
 void processSummation(Event e) {
     int spacePos = e.instructions.find(' ');
@@ -122,20 +117,14 @@ void processSummation(Event e) {
 
     string startStr = e.instructions.substr(0, spacePos);
     string endStr = e.instructions.substr(spacePos + 1);
-
-    int start = 0, end = 0;
-    for (char c : startStr) {
-        start = start * 10 + (c - '0');
-    }
-    for (char c : endStr) {
-        end = end * 10 + (c - '0');
-    }
-
+    
+    int start = stoi(startStr);
+    int end = stoi(endStr);
+    
     long long sum = 0;
     for (int i = start; i <= end; i++) {
         sum += i;
     }
-
     lock_guard<mutex> lock(consoleMutex);
     cout << "Event " << e.id << " (SUMMATION): Sum from " << start 
          << " to " << end << " = " << sum << endl;
@@ -155,11 +144,18 @@ void processAlphabet(Event e) {
     }
 }
 
+// New default worker function for unknown event types
+void processUnknown(Event e) {
+    lock_guard<mutex> lock(consoleMutex);
+    cout << "Event " << e.id << " (UNKNOWN): Event type '" << e.type 
+         << "' not recognized. Instructions: " << e.instructions << endl;
+}
+
 int main() {
     EventQueue eq;
-    ThreadPool pool(4); // Create thread pool with 4 threads
+    ThreadPool pool(4); 
 
-    // Worker function that processes events
+    
     auto worker = [&eq, &pool]() {
         while (true) {
             Event e;
@@ -167,22 +163,22 @@ int main() {
                 break;
             }
 
-            // Create task based on event type
+            
             if (e.type == "SUMMATION") {
                 pool.enqueue([e]() { processSummation(e); });
             } else if (e.type == "ALPHABET") {
                 pool.enqueue([e]() { processAlphabet(e); });
             } else {
-                // If event type is unknown, put it back in the queue
-                eq.addEvent(e);
+                // Handle unknown event types using the default worker
+                pool.enqueue([e]() { processUnknown(e); });
             }
         }
     };
 
-    // Start a single thread to dequeue events and dispatch tasks
+  
     thread eventDispatcher(worker);
 
-    // Create and add sample events
+    
     Event e1{1, "SUMMATION", "1 10"};
     eq.addEvent(e1);
 
@@ -192,10 +188,14 @@ int main() {
     Event e3{3, "SUMMATION", "5 15"};
     eq.addEvent(e3);
 
-    // Wait for some time to allow processing
+    
+    Event e4{4, "INVALID_TYPE", "test"};
+    eq.addEvent(e4);
+
+
     this_thread::sleep_for(chrono::seconds(1));
 
-    // Stop the queue
+
     eq.setStop();
 
     // Wait for event dispatcher to finish
