@@ -6,10 +6,33 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <chrono>
 
 using namespace std;
 
 mutex consoleMutex;
+
+// Logging utility
+void logMessage(const string& message) {
+    lock_guard<mutex> lock(consoleMutex);
+    cout << "[LOG] " << message << endl;
+}
+
+// Performance monitoring utility
+class Timer {
+private:
+    chrono::high_resolution_clock::time_point start_time;
+
+public:
+    Timer() : start_time(chrono::high_resolution_clock::now()) {}
+
+    ~Timer() {
+        auto end_time = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
+        lock_guard<mutex> lock(consoleMutex);
+        cout << "[PERFORMANCE] Task completed in " << duration << " ms" << endl;
+    }
+};
 
 struct Event {
     int id;
@@ -108,6 +131,8 @@ public:
 };
 
 void processSummation(Event e) {
+    Timer timer; // Start performance monitoring
+    logMessage("Processing SUMMATION event with ID: " + to_string(e.id));
     int spacePos = e.instructions.find(' ');
     if (spacePos == string::npos) {
         lock_guard<mutex> lock(consoleMutex);
@@ -131,6 +156,8 @@ void processSummation(Event e) {
 }
 
 void processAlphabet(Event e) {
+    Timer timer; // Start performance monitoring
+    logMessage("Processing ALPHABET event with ID: " + to_string(e.id));
     int count = 0;
     for (char c : e.instructions) {
         count = count * 10 + (c - '0');
@@ -146,12 +173,15 @@ void processAlphabet(Event e) {
 
 // New default worker function for unknown event types
 void processUnknown(Event e) {
+    Timer timer; // Start performance monitoring
+    logMessage("Processing UNKNOWN event with ID: " + to_string(e.id));
     lock_guard<mutex> lock(consoleMutex);
     cout << "Event " << e.id << " (UNKNOWN): Event type '" << e.type 
          << "' not recognized. Instructions: " << e.instructions << endl;
 }
 
 int main() {
+    logMessage("Program started");
     EventQueue eq;
     ThreadPool pool(4); 
 
@@ -163,6 +193,7 @@ int main() {
                 break;
             }
 
+            logMessage("Dispatching event with ID: " + to_string(e.id));
             
             if (e.type == "SUMMATION") {
                 pool.enqueue([e]() { processSummation(e); });
@@ -201,8 +232,6 @@ int main() {
     // Wait for event dispatcher to finish
     eventDispatcher.join();
 
-    lock_guard<mutex> lock(consoleMutex);
-    cout << "All events processed. Program terminated." << endl;
-
+    logMessage("All events processed. Program terminated.");
     return 0;
 }
