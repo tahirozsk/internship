@@ -9,6 +9,10 @@ A C++ multithreaded event processing system using a thread-safe queue and a thre
 - **Alphabet Events**: Prints the alphabet a specified number of times (e.g., "2" prints it twice).
 - **Unknown Event Types**: Gracefully handles unrecognized event types by logging them with a default worker.
 
+### Logging and Performance Monitoring
+- **Thread-Safe Logging**: Logs all significant actions (e.g., event dispatching, processing) in a thread-safe manner using `std::mutex`.
+- **Performance Monitoring**: Measures and logs the time taken to process each event using the `Timer` utility.
+
 ### Thread Management
 - **Thread Pool**: Uses a dynamic thread pool initialized with the number of hardware threads (`std::thread::hardware_concurrency()` by default) for efficient task distribution.
 - **Synchronization**: Employs `std::mutex` and `std::condition_variable` for thread-safe operations.
@@ -37,13 +41,26 @@ Run the application:
 
 ## Example Output
 ```sh
+[LOG] Program started
+[LOG] Dispatching event with ID: 1
+[LOG] Processing SUMMATION event with ID: 1
 Event 1 (SUMMATION): Sum from 1 to 10 = 55
+[PERFORMANCE] Task completed in 0 ms
+[LOG] Dispatching event with ID: 2
+[LOG] Processing ALPHABET event with ID: 2
 Event 2 (ALPHABET): Printing alphabet 2 times
 abcdefghijklmnopqrstuvwxyz
 abcdefghijklmnopqrstuvwxyz
+[PERFORMANCE] Task completed in 1 ms
+[LOG] Dispatching event with ID: 3
+[LOG] Processing SUMMATION event with ID: 3
 Event 3 (SUMMATION): Sum from 5 to 15 = 110
+[PERFORMANCE] Task completed in 0 ms
+[LOG] Dispatching event with ID: 4
+[LOG] Processing UNKNOWN event with ID: 4
 Event 4 (UNKNOWN): Event type 'INVALID_TYPE' not recognized. Instructions: test
-All events processed. Program terminated.
+[PERFORMANCE] Task completed in 0 ms
+[LOG] All events processed. Program terminated.
 ```
 
 ## Project Structure
@@ -90,27 +107,4 @@ Events are dispatched to a thread pool, which assigns tasks to available threads
    git push origin feature/your-feature
    ```
 5. Submit a pull request.
-
-## .gitignore
-```
-# Ignore compiled binaries
-*.o
-*.out
-*.exe
-
-# Ignore build directory
-/build/
-
-# Ignore system files
-.DS_Store
-Thumbs.db
-
-# Ignore dependency files
-*.d
-
-# Ignore logs and temporary files
-*.log
-*.tmp
-*.swp
-```
 

@@ -1,0 +1,19 @@
+# Ignore compiled binaries
+*.o
+*.out
+*.exe
+
+# Ignore build directory
+/build/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore dependency files
+*.d
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
