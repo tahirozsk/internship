@@ -25,13 +25,14 @@ private:
 
 public:
     Timer() : start_time(chrono::high_resolution_clock::now()) {}
+    // starts the timer, constructor
 
-    ~Timer() {
+    ~Timer() { 
         auto end_time = chrono::high_resolution_clock::now();
         auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count();
         lock_guard<mutex> lock(consoleMutex);
         cout << "[PERFORMANCE] Task completed in " << duration << " ms" << endl;
-    }
+    } // stops the time when object goes out of scope, destructor
 };
 
 struct Event {
@@ -207,31 +208,47 @@ int main() {
     };
 
   
-    thread eventDispatcher(worker);
+    thread eventDispatcher(worker); // Start the event dispatcher thread and pass the events to the worker
 
-    
-    Event e1{1, "SUMMATION", "1 10"};
-    eq.addEvent(e1);
+    // Dynamic event with user input
+    int eventId = 1; 
+    string type, instructions;
 
-    Event e2{2, "ALPHABET", "2"};
-    eq.addEvent(e2);
+    while (true) {
+        // Display options
+        cout << "\nChoose event type:\n";
+        cout << "1. SUMMATION\n";
+        cout << "2. ALPHABET\n";
+        cout << "3. Exit\n";
+        cout << "Enter choice (1-3): ";
 
-    Event e3{3, "SUMMATION", "5 15"};
-    eq.addEvent(e3);
+        int choice;
+        cin >> choice;
 
-    
-    Event e4{4, "INVALID_TYPE", "test"};
-    eq.addEvent(e4);
+        if (choice == 3) break; // Exit input loop
 
+        if (choice == 1) {
+            type = "SUMMATION";
+            cout << "Enter range (e.g., 1 10): ";
+        } else if (choice == 2) {
+            type = "ALPHABET";
+            cout << "Enter count (e.g., 2): ";
+        } else {
+            cout << "Invalid choice. Try again.\n";
+            continue;
+        }
 
-    this_thread::sleep_for(chrono::seconds(1));
+        cin.ignore(); // Clear newline left in input buffer
+        getline(cin, instructions); // Get full instruction line
 
+        // Create and queue the event
+        eq.addEvent(Event{eventId++, type, instructions});
+    }
 
-    eq.setStop();
-
-    // Wait for event dispatcher to finish
-    eventDispatcher.join();
-
+    // --- Cleanup ---
+    eq.setStop();           // Signal no more events will be added
+    eventDispatcher.join(); // Wait for event dispatcher to finish
     logMessage("All events processed. Program terminated.");
     return 0;
+
 }
