@@ -1,110 +1,107 @@
-# Event Processing System
+# Dynamic Event Processing System
 
-A C++ multithreaded event processing system using a thread-safe queue and a thread pool. The system enables parallel processing of various event types with efficient task distribution, ensuring safe and scalable execution.
+A modern, menu-driven C++ event processing application that allows you to easily add and handle new event types. The system is designed for flexibility, clarity, and extensibility.
 
 ## Features
 
-### Event Handling
-- **Summation Events**: Computes the sum of numbers within a specified range (e.g., "1 10" sums numbers from 1 to 10).
-- **Alphabet Events**: Prints the alphabet a specified number of times (e.g., "2" prints it twice).
-- **Unknown Event Types**: Gracefully handles unrecognized event types by logging them with a default worker.
+- **Dynamic Event Handling:**  
+  Register new event types and handlers with a single line of code. The menu updates automatically.
+- **Menu-Driven User Interface:**  
+  Users can select event types and input instructions interactively.
+- **Extensible Design:**  
+  Add new event types by simply creating a handler function and registering it.
+- **Logging and Performance Monitoring:**  
+  All actions are logged, and event processing time is measured.
 
-### Logging and Performance Monitoring
-- **Thread-Safe Logging**: Logs all significant actions (e.g., event dispatching, processing) in a thread-safe manner using `std::mutex`.
-- **Performance Monitoring**: Measures and logs the time taken to process each event using the `Timer` utility.
+## How It Works
 
-### Thread Management
-- **Thread Pool**: Uses a dynamic thread pool initialized with the number of hardware threads (`std::thread::hardware_concurrency()` by default) for efficient task distribution.
-- **Synchronization**: Employs `std::mutex` and `std::condition_variable` for thread-safe operations.
+1. The program displays a menu of available event types.
+2. The user selects an event type and enters instructions.
+3. The corresponding handler function processes the event and displays output.
+4. The menu reappears for further input or exit.
 
-### Queue System
-- **Thread-Safe Event Queue**: Manages events with a producer-consumer pattern using `EventQueue`.
-- **Graceful Shutdown**: Supports a stop flag to terminate the system safely, ensuring all threads complete their tasks.
+## Adding a New Event Type
 
-## Installation
+1. **Define a Handler Function:**  
+   In `EventProcessors.cpp` and declare it in `EventProcessors.h`, e.g.:
+   ```cpp
+   void processMyEvent(const Event& e) {
+       // Your logic here
+   }
+   ```
+2. **Register the Handler:**  
+   In `main.cpp`, add:
+   ```cpp
+   eventHandlers["MY_EVENT"] = processMyEvent;
+   ```
+   That's it! "MY_EVENT" will appear in the menu.
 
-Clone the repository:
-```sh
-git clone https://github.com/tahirozsk/internship.git
-cd internship
+## Build & Run (Windows)
+
+1. Open a terminal (PowerShell or Command Prompt).
+2. Navigate to the project directory.
+3. Build using:
+   ```sh
+   make
+   ```
+4. Run the application:
+   ```sh
+   .\bin\event_processor
+   ```
+
+## Example Usage
+
 ```
-
-Compile the program (requires a C++11-compliant compiler):
-```sh
-g++ -std=c++11 -pthread main.cpp -o event_processor
-```
-
-Run the application:
-```sh
-./event_processor
-```
-
-## Example Output
-```sh
-[LOG] Program started
+Choose event type:
+1. ALPHABET
+2. SUMMATION
+3. Exit
+Enter choice (1-3): 1
+Enter instructions: 2
 [LOG] Dispatching event with ID: 1
-[LOG] Processing SUMMATION event with ID: 1
-Event 1 (SUMMATION): Sum from 1 to 10 = 55
-[PERFORMANCE] Task completed in 0 ms
-[LOG] Dispatching event with ID: 2
-[LOG] Processing ALPHABET event with ID: 2
-Event 2 (ALPHABET): Printing alphabet 2 times
+[LOG] Processing ALPHABET event with ID: 1
+Event 1 (ALPHABET): Printing alphabet 2 times
 abcdefghijklmnopqrstuvwxyz
 abcdefghijklmnopqrstuvwxyz
-[PERFORMANCE] Task completed in 1 ms
-[LOG] Dispatching event with ID: 3
-[LOG] Processing SUMMATION event with ID: 3
-Event 3 (SUMMATION): Sum from 5 to 15 = 110
 [PERFORMANCE] Task completed in 0 ms
-[LOG] Dispatching event with ID: 4
-[LOG] Processing UNKNOWN event with ID: 4
-Event 4 (UNKNOWN): Event type 'INVALID_TYPE' not recognized. Instructions: test
-[PERFORMANCE] Task completed in 0 ms
+
+Choose event type:
+1. ALPHABET
+2. SUMMATION
+3. Exit
+Enter choice (1-3): 3
 [LOG] All events processed. Program terminated.
 ```
 
 ## Project Structure
+
 ```
 internship/
-├── src/
-│   ├── main.cpp          # Main implementation with EventQueue and ThreadPool
-├── build/                # Directory for compiled binaries (optional)
-├── .gitignore
-├── README.md             # This file
-└── Makefile              # Optional: Add for easier compilation
+├── Header_Files/         # Header files (Event, EventQueue, etc.)
+├── Source_Files/         # Source code (.cpp files)
+├── bin/                  # Compiled executable
+├── obj/                  # Object files
+├── README.md
+├── makefile
+└── .gitignore
 ```
 
-### Notes on Structure
-The provided code is contained in a single `main.cpp` file for simplicity. In a larger project, consider separating `EventQueue`, `ThreadPool`, and worker functions into dedicated header and source files (e.g., `event_queue.h`, `thread_pool.h`, `workers.h`).
-
-## Usage
-The system processes events added to the `EventQueue`. Each event consists of:
-- **id**: Unique identifier (integer).
-- **type**: Event type (string, e.g., "SUMMATION", "ALPHABET").
-- **instructions**: Event-specific instructions (string).
-
-Events are dispatched to a thread pool, which assigns tasks to available threads. Example events from the code:
-- `Event{1, "SUMMATION", "1 10"}`: Sums numbers from 1 to 10.
-- `Event{2, "ALPHABET", "2"}`: Prints the alphabet twice.
-- `Event{4, "INVALID_TYPE", "test"}`: Logs an unrecognized event type.
-
-## Security
-- **Thread Safety**: Uses `std::mutex` and `std::lock_guard` to prevent race conditions when accessing shared resources (e.g., console output, queue).
-- **Resource Management**: Thread pool ensures proper cleanup of threads on program termination via destructor.
-
 ## Contributing
+
 1. Fork the repository.
 2. Create a new branch:
    ```sh
    git checkout -b feature/your-feature
    ```
-3. Make your changes and commit them:
+3. Make your changes and commit:
    ```sh
-   git commit -m "Add your message"
+   git commit -m "Describe your change"
    ```
-4. Push to your branch:
-   ```sh
-   git push origin feature/your-feature
-   ```
-5. Submit a pull request.
+4. Push and open a pull request.
 
+---
+
+**Note:**  
+This project is designed for clarity and extensibility. For advanced use cases, you can re-enable multithreading or event queueing as needed.
+
+---

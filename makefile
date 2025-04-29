@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -pthread -IHeader_Files
+CXXFLAGS = -std=c++14 -Wall -pthread -IHeader_Files
 SRC_DIR = Source_Files
 OBJ_DIR = obj
 BIN_DIR = bin
@@ -15,7 +15,8 @@ all: directories $(TARGET)
 
 # Create necessary directories
 directories:
-	mkdir -p $(OBJ_DIR) $(BIN_DIR)
+	if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+	if not exist $(BIN_DIR) mkdir $(BIN_DIR)
 
 # Compile the target executable
 $(TARGET): $(OBJS)
