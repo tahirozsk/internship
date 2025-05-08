@@ -1,3 +1,4 @@
+# Compiler and flags
 CXX = g++
 CXXFLAGS = -std=c++14 -Wall -pthread -IHeader_Files
 SRC_DIR = Source_Files
@@ -28,7 +29,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Clean rule
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
+	if exist $(OBJ_DIR) rmdir /S /Q $(OBJ_DIR)
+	if exist $(BIN_DIR) rmdir /S /Q $(BIN_DIR)
 
 # Dependencies
 $(OBJ_DIR)/main.o: $(SRC_DIR)/main.cpp Header_Files/Event.h Header_Files/EventQueue.h Header_Files/ThreadPool.h Header_Files/Log.h Header_Files/EventProcessors.h

@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+#include <limits> // For std::numeric_limits
 
 int main() {
     logMessage("Program started");
@@ -35,6 +36,8 @@ int main() {
             } else {
                 pool.enqueue([handler=eventHandlers["UNKNOWN"], e]() { handler(e); });
             }
+            // Wait for event to be processed before allowing menu redraw
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
     };
 
@@ -46,32 +49,51 @@ int main() {
 
     int choice;
     do {
-        // Display options
-        std::cout << "\nChoose event type:\n";
-        // Dynamically display available event types
+        // Declare idx and types outside the lock block
         int idx = 1;
         std::vector<std::string> types;
-        for (const auto& pair : eventHandlers) {
-            if (pair.first != "UNKNOWN") {
-                std::cout << idx << ". " << pair.first << "\n";
-                types.push_back(pair.first);
-                idx++;
+        // Synchronize menu display
+        {
+            std::lock_guard<std::mutex> lock(consoleMutex);
+            std::cout << "\nChoose event type:\n";
+            for (const auto& pair : eventHandlers) {
+                if (pair.first != "UNKNOWN") {
+                    std::cout << idx << ". " << pair.first << "\n";
+                    types.push_back(pair.first);
+                    idx++;
+                }
             }
+            std::cout << idx << ". Exit\n";
+            std::cout << "Enter choice (1-" << idx << "): ";
+            std::cout.flush(); // Ensure prompt is displayed immediately
         }
-        std::cout << idx << ". Exit\n";
-        std::cout << "Enter choice (1-" << idx << "): ";
 
-        std::cin >> choice;
+        // Clear input buffer thoroughly before reading choice
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        while (!(std::cin >> choice)) {
+            std::cin.clear(); // Clear error state
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear buffer
+            std::lock_guard<std::mutex> lock(consoleMutex);
+            std::cout << "Invalid input. Enter choice (1-" << idx << "): ";
+        }
 
         if (choice == idx) break; // Exit input loop
 
         if (choice > 0 && choice < idx) {
             type = types[choice - 1];
-            std::cout << "Enter instructions: ";
-            std::cin.ignore(); // Clear newline left in input buffer
+            {
+                std::lock_guard<std::mutex> lock(consoleMutex);
+                std::cout << "Enter instructions: ";
+                std::cout.flush();
+            }
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear buffer before getline
             std::getline(std::cin, instructions); // Get full instruction line
             eq.addEvent(Event{eventId++, type, instructions});
+            // Wait for event processing to complete before next prompt
+            std::this_thread::sleep_for(std::chrono::milliseconds(600));
         } else {
+            std::lock_guard<std::mutex> lock(consoleMutex);
             std::cout << "Invalid choice. Try again.\n";
         }
     } while (true);

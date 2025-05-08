@@ -9,8 +9,7 @@ void processSummation(Event e) {
     logMessage("Processing SUMMATION event with ID: " + std::to_string(e.id));
     int spacePos = e.instructions.find(' ');
     if (static_cast<size_t>(spacePos) == std::string::npos) {
-        std::lock_guard<std::mutex> lock(consoleMutex);
-        std::cout << "Event " << e.id << " (SUMMATION): Invalid instructions format" << std::endl;
+        logMessage("Event " + std::to_string(e.id) + " (SUMMATION): Invalid instructions format");
         return;
     }
 
@@ -24,9 +23,8 @@ void processSummation(Event e) {
     for (int i = start; i <= end; i++) {
         sum += i;
     }
-    std::lock_guard<std::mutex> lock(consoleMutex);
-    std::cout << "Event " << e.id << " (SUMMATION): Sum from " << start 
-         << " to " << end << " = " << sum << std::endl;
+    logMessage("Event " + std::to_string(e.id) + " (SUMMATION): Sum from " + std::to_string(start) 
+               + " to " + std::to_string(end) + " = " + std::to_string(sum));
 }
 
 void processAlphabet(Event e) {
@@ -37,18 +35,17 @@ void processAlphabet(Event e) {
         count = count * 10 + (c - '0');
     }
 
-    std::lock_guard<std::mutex> lock(consoleMutex);
-    std::cout << "Event " << e.id << " (ALPHABET): Printing alphabet " 
-         << count << " times" << std::endl;
+    logMessage("Event " + std::to_string(e.id) + " (ALPHABET): Printing alphabet " 
+               + std::to_string(count) + " times");
+    std::string alphabet = "abcdefghijklmnopqrstuvwxyz";
     for (int i = 0; i < count; i++) {
-        std::cout << "abcdefghijklmnopqrstuvwxyz" << std::endl;
+        logMessage(alphabet);
     }
 }
 
 void processUnknown(Event e) {
     Timer timer; // Start performance monitoring
     logMessage("Processing UNKNOWN event with ID: " + std::to_string(e.id));
-    std::lock_guard<std::mutex> lock(consoleMutex);
-    std::cout << "Event " << e.id << " (UNKNOWN): Event type '" << e.type 
-         << "' not recognized. Instructions: " << e.instructions << std::endl;
+    logMessage("Event " + std::to_string(e.id) + " (UNKNOWN): Event type '" + e.type 
+               + "' not recognized. Instructions: " + e.instructions);
 }
